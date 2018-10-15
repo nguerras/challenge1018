@@ -8,39 +8,60 @@
 
 function findLongestFromACell($x, $y, $i, $j, $mat, $dp)
 {
-    $pathsFromCell = [];
+    $maxValue = 0;
+    $startValue = 1501;
 
-    if ($dp[$i][$j] != -1)
+    if (is_array($dp[$i][$j]))
     {
         return $dp[$i][$j];
     }
 
     if ($j < $y - 1 && ($mat[$i][$j] > $mat[$i][$j + 1]))
     {
-        $pathsFromCell[] = findLongestFromACell($x, $y, $i, $j + 1, $mat, $dp);
+        $aux = findLongestFromACell($x, $y, $i, $j + 1, $mat, $dp);
+        $maxValue = $aux['maxValue'];
+        $startValue = $aux['start'];
     }
 
     if ($j > 0 && ($mat[$i][$j] > $mat[$i][$j - 1]))
     {
-        $pathsFromCell[] = findLongestFromACell($x, $y, $i, $j - 1, $mat, $dp);
+        $aux = findLongestFromACell($x, $y, $i, $j - 1, $mat, $dp);
+        if (($aux['maxValue'] > $maxValue) || ($aux['maxValue'] == $maxValue && $aux['start'] < $startValue))
+        {
+            $maxValue = $aux['maxValue'];
+            $startValue = $aux['start'];
+        }
     }
 
     if ($i > 0 && ($mat[$i][$j] > $mat[$i - 1][$j]))
     {
-        $pathsFromCell[] = findLongestFromACell($x, $y, $i - 1, $j, $mat, $dp);
+        $aux = findLongestFromACell($x, $y, $i - 1, $j, $mat, $dp);
+        if (($aux['maxValue'] > $maxValue) || ($aux['maxValue'] == $maxValue && $aux['start'] < $startValue))
+        {
+            $maxValue = $aux['maxValue'];
+            $startValue = $aux['start'];
+        }
+
     }
 
     if ($i < $x - 1 && ($mat[$i][$j] > $mat[$i + 1][$j]))
     {
-        $pathsFromCell[] = findLongestFromACell($x, $y, $i + 1, $j, $mat, $dp);
+        $aux = findLongestFromACell($x, $y, $i + 1, $j, $mat, $dp);
+        if (($aux['maxValue'] > $maxValue) || ($aux['maxValue'] == $maxValue && $aux['start'] < $startValue))
+        {
+            $maxValue = $aux['maxValue'];
+            $startValue = $aux['start'];
+        }
     }
 
-    if (count($pathsFromCell) > 0)
+    if ($maxValue > 0)
     {
-        $dp[$i][$j] = 1 + max($pathsFromCell);
+        $dp[$i][$j] = ['maxValue' => 1 + $maxValue];
+        $dp[$i][$j]['start'] = $startValue;
     } else
     {
-        $dp[$i][$j] = 1;
+        $dp[$i][$j] = ['maxValue' => 1];
+        $dp[$i][$j]['start'] = $mat[$i][$j];
     }
 
     return $dp[$i][$j];
@@ -49,6 +70,9 @@ function findLongestFromACell($x, $y, $i, $j, $mat, $dp)
 
 function finLongestOverAll($mat, $x, $y)
 {
+    $maxValue = 0;
+    $difValue = 0;
+
     for ($i = 0; $i < $x; $i++)
     {
         $dp[$i] = array_fill(0, $y, -1);
@@ -60,13 +84,16 @@ function finLongestOverAll($mat, $x, $y)
         {
             if ($dp[$i][$j] == -1)
             {
-                echo("<br/>Sizing from position " . $i . " " . $j . "<br/>");
                 $dp[$i][$j] = findLongestFromACell($x, $y, $i, $j, $mat, $dp);
-                echo("Max path:" . $dp[$i][$j] . "<br/>");
+                if (($dp[$i][$j]['maxValue'] > $maxValue) || ($dp[$i][$j]['maxValue'] == $maxValue && ($mat[$i][$j] - $dp[$i][$j]['start']) > $difValue))
+                {
+                    $maxValue = $dp[$i][$j]['maxValue'];
+                    $difValue = $mat[$i][$j] - $dp[$i][$j]['start'];
+                }
             }
         }
     }
-
+    echo("<br/>Max Path:" . $maxValue . " and Steepest:" . $difValue);
     return $dp;
 }
 
@@ -78,7 +105,6 @@ $matrix = [
     [4, 4, 1, 6],
 ];
 
-var_dump($matrix);
 echo("<br/>");
 $result = finLongestOverAll($matrix, 4, 4);
 
