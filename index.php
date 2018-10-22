@@ -26,7 +26,7 @@ function findLongestFromACell($x, $y, $i, $j, &$mat, &$dp)
 
     // If this cell has already been computed return the result
     if (is_array($dp[$i][$j]))
-        return $dp[$i][$j];
+        return;
 
     // If we can go west, compute the next cell in the way
     if ($j < $y - 1 && ($mat[$i][$j] > $mat[$i][$j + 1]))
