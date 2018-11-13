@@ -109,7 +109,7 @@ function findLongestFromACell($x, $y, $i, $j, &$mat, &$dp)
  * @param &$mat - reference to the Map's matrix
  * @param $x - Dimesion x or number of lines of the map's matrix
  * @param $y - Dimesion y or number of columns of the map's matrix
- * @param $end -
+ * @param $start -
  * @return array - That conteins:
                         'maxValue' - int - that is the number of steps of the longest path
                         'difValue' - int - that is the diference between the first value of the path and the last one
@@ -151,24 +151,32 @@ function finLongestOverAll(&$mat, $x, $y, $start)
 }
 
 $matrix = [];
-/*$matrix = [
-    [4, 8, 7, 3],
-    [2, 5, 9, 3],
-    [6, 3, 2, 5],
-    [4, 4, 1, 6],
-];*/
 
-//We generate a random matrix with the values given in the form
-for ($i = 0; $i < (int)$_POST['x']; $i++)
-{
-    for ($j = 0; $j < (int)$_POST['y']; $j++)
-    {
-        $matrix[$i][$j] = rand((int)$_POST['start'], (int)$_POST['end']);
+//We read the matrix from a file
+$arrayIndexX = -1;
+if ($file = fopen($_POST['filename'], 'r')){
+    while (!feof($file)){
+        $line = fgets($file);
+        if ($arrayIndexX == -1){
+            $dimensions = explode(' ', $line);
+            $x = $dimensions[0];
+            $y = $dimensions[1];
+        }else{
+            $arrayIndexY = 0;
+            $row = explode(' ', $line);
+            foreach ($row as $element){
+                $matrix[$arrayIndexX][$arrayIndexY] = (int)$element;
+                $arrayIndexY++;
+            }
+        }
+        $arrayIndexX++;
     }
+    fclose($file);
 }
 
+
 //We ask for the best path
-$result = finLongestOverAll($matrix, (int)$_POST['x'], (int)$_POST['y'], (int)$_POST['start']);
+$result = finLongestOverAll($matrix, $arrayIndexX, $arrayIndexY, 0);
 ?>
 
 <!DOCTYPE html>
@@ -183,6 +191,7 @@ $result = finLongestOverAll($matrix, (int)$_POST['x'], (int)$_POST['y'], (int)$_
 <div class="col-md-12 p-lg-5 mx-auto my-5">
     <?php
     //We show the data of best path
+    echo("<br/>Dimension X: " . $x . " - Dimension Y: " . $y);
     echo("<br/>Max Path: " . $result['maxValue'] . " - Drop: " . $result['difValue'] . " - Path: ");
     foreach ($result['path'] as $step)
     {
